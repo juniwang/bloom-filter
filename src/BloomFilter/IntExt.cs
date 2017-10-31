@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace BloomFilter
 {
+    /// <summary>
+    /// Extension methods for integer
+    /// </summary>
     public static class IntExt
     {
         public static int RotateLeft(this int value, int count)

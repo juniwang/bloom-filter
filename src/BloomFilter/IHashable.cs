@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace BloomFilter
 {
+    /// <summary>
+    /// Intances that can compute its hash
+    /// </summary>
     interface IHashable
     {
         /// <summary>
-        /// Convert to byte[] to compute hash.
+        /// Convert the current object to byte[] for hash computation.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>byte array.</returns>
         byte[] ToBytes();
     }
 }

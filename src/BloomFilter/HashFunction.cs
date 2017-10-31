@@ -7,23 +7,30 @@ using System.Threading.Tasks;
 
 namespace BloomFilter
 {
+    /// <summary>
+    /// A class defines how to compute hash. Also defines some known HashFunctions like MD5 based or SHA1 based function.
+    /// </summary>
     class HashFunction
     {
-        /// <param name="value">the byte[] representation of the element to be hashed </param>
-        /// <param name="m">integer output range [1,size]</param>
+        /// <param name="value">the byte[] representation of the raw element to be hashed </param>
+        /// <param name="m">the size of the BF. integer output range [1,size]</param>
         /// <param name="k">number of hashes to be computed</param>
         /// <returns>int array of hashes hash values</returns>
         Func<byte[], int, int, int[]> hashFunction;
 
+        /// <summary>
+        /// Create a new HashFunction using the concrete hash method.
+        /// </summary>
+        /// <param name="hashFunction">concrete hash method to compute hash.</param>
         public HashFunction(Func<byte[], int, int, int[]> hashFunction)
         {
-            if (hashFunction == null)
-                throw new ArgumentNullException();
-
-            this.hashFunction = hashFunction;
+            this.hashFunction = hashFunction ?? throw new ArgumentNullException();
         }
 
         #region commonly used HashFunctions
+        /// <summary>
+        /// Hash with Carter Wegman methdod: https://en.wikipedia.org/wiki/Universal_hashing#Hashing_integers
+        /// </summary>
         public static HashFunction CarterWegman
         {
             get
@@ -32,6 +39,9 @@ namespace BloomFilter
             }
         }
 
+        /// <summary>
+        /// Hash with RNG(Random Number Generator)
+        /// </summary>
         public static HashFunction RNG
         {
             get
@@ -40,6 +50,9 @@ namespace BloomFilter
             }
         }
 
+        /// <summary>
+        /// Hash with simple LCG(Linear Congruential Generator)
+        /// </summary>
         public static HashFunction SimpleLCG
         {
             get
@@ -48,6 +61,9 @@ namespace BloomFilter
             }
         }
 
+        /// <summary>
+        /// Compute hash using murmur3: https://en.wikipedia.org/wiki/MurmurHash#MurmurHash3
+        /// </summary>
         public static HashFunction Murmur3
         {
             get
@@ -64,6 +80,9 @@ namespace BloomFilter
             }
         }
 
+        /// <summary>
+        /// Compute hash using MD5 HashAlgorithm.
+        /// </summary>
         public static HashFunction MD5
         {
             get
@@ -72,6 +91,9 @@ namespace BloomFilter
             }
         }
 
+        /// <summary>
+        /// Compute hash using SHA1 HashAlgorithm.
+        /// </summary>
         public static HashFunction SHA1
         {
             get
@@ -80,6 +102,9 @@ namespace BloomFilter
             }
         }
 
+        /// <summary>
+        /// Compute hash using SHA256 HashAlgorithm.
+        /// </summary>
         public static HashFunction SHA256
         {
             get
@@ -88,6 +113,9 @@ namespace BloomFilter
             }
         }
 
+        /// <summary>
+        /// Compute hash using SHA384 HashAlgorithm.
+        /// </summary>
         public static HashFunction SHA384
         {
             get
@@ -96,6 +124,9 @@ namespace BloomFilter
             }
         }
 
+        /// <summary>
+        /// Compute hash using SHA512 HashAlgorithm.
+        /// </summary>
         public static HashFunction SHA512
         {
             get

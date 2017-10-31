@@ -122,6 +122,13 @@ namespace BloomFilter
         #endregion
 
         #region HashMurmur3 && HashCanssandra
+        /// <summary>
+        /// Compute hash using murmur3: https://en.wikipedia.org/wiki/MurmurHash#MurmurHash3
+        /// </summary>
+        /// <param name="value">the value to be hashed</param>
+        /// <param name="m">integer output range [1,size]</param>
+        /// <param name="k">number of hashes to be computed</param>
+        /// <returns>array with <i>hashes</i> integer hash positions in the range <i>[0,size)</i></returns>
         public static int[] HashMurmur3(byte[] value, int m, int k)
         {
             return RejectionSample(murmur3_signed, value, m, k);

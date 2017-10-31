@@ -7,6 +7,14 @@ using System.Threading.Tasks;
 
 namespace BloomFilter
 {
+    /// <summary>
+    /// Configuration of BF.
+    /// </summary>
+    /// <typeparam name="TEntity">type of the entity to add/query in bloom filter.
+    /// It must implement IHasKey interface,
+    /// </typeparam>
+    /// <typeparam name="TKey">type of the key(sth like unique identifier of the TEntity) to generate hash. 
+    /// It contains a ToBytes method to generate raw not-hashed byte array.</typeparam>
     class BloomFilterBuilder<TEntity, TKey> 
         where TEntity : IHasKey<TKey>
         where TKey : IHashable
@@ -23,7 +31,7 @@ namespace BloomFilter
         /// </summary>
         public HashFunction HashFunction { get; set; }
         /// <summary>
-        /// Number of hash functions
+        /// Number of hash functions.
         /// </summary>
         public int Hashes { get; private set; }
         /// <summary>
@@ -44,11 +52,22 @@ namespace BloomFilter
         public IDataStorage<TEntity, TKey> DataStorage { get; private set; }
 
         #region ctor
+        /// <summary>
+        /// Create new instance with default values. Must specify either (capacity, falsePositiveProbability) 
+        /// or (size, hashes) before create BF instance.
+        /// </summary>
         public BloomFilterBuilder()
         {
             Initialize();
         }
 
+        /// <summary>
+        ///  Create new instance with (capacity, falsePositiveProbability). Will caculate optimal size and hashes 
+        ///  if they are not explicitly defined.
+        /// </summary>
+        /// <param name="capacity">The anticipated number of items to be added to the filter. More than this number of items
+        /// can be added, but the error rate(false positive probability) will exceed what is expected.</param>
+        /// <param name="falsePositiveProbability">The accepable false-positive rate (e.g., 0.01F = 1%)</param>
         public BloomFilterBuilder(int capacity, double falsePositiveProbability)
         {
             Initialize();
@@ -56,6 +75,12 @@ namespace BloomFilter
             FalsePositiveProbability = falsePositiveProbability;
         }
 
+        /// <summary>
+        /// Create new instance with (size, hashes). Will caculate optimal capacity and falsePositiveProbability 
+        ///  if they are not explicitly defined.
+        /// </summary>
+        /// <param name="size">The size of the BloomFilter bit sets.</param>
+        /// <param name="hashes">Number of hash functions.</param>
         public BloomFilterBuilder(int size, int hashes)
         {
             Initialize();
@@ -63,6 +88,9 @@ namespace BloomFilter
             Hashes = hashes;
         }
 
+        /// <summary>
+        /// Set default values for required fields.
+        /// </summary>
         private void Initialize()
         {
             Name = "Default";
@@ -71,6 +99,10 @@ namespace BloomFilter
         }
         #endregion
 
+        /// <summary>
+        /// Create a new BloomFilter. Either (capacity, falsePositiveProbability) or (size, hashes) must be set.
+        /// </summary>
+        /// <returns>intance of BloomFilter</returns>
         public BloomFilter<TEntity, TKey> BuildBloomFilter()
         {
             CheckConfig();
@@ -78,9 +110,9 @@ namespace BloomFilter
         }
 
         /// <summary>
-        /// Build a counting bloom filter
+        /// Create a counting bloom filter. Either (capacity, falsePositiveProbability) or (size, hashes) must be set.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>intance of Counting BloomFilter</returns>
         public CountingBloomFilter<TEntity, TKey> BuildCountingBloomFilter()
         {
             CheckConfig();
@@ -88,6 +120,10 @@ namespace BloomFilter
         }
 
         #region calculate optimal values
+        /// <summary>
+        /// Make sure capacity, falsePositiveProbability, size, hashes are properly set. Either (capacity, falsePositiveProbability)
+        /// or (size, hashes) must be set by caller. 
+        /// </summary>
         public void CheckConfig()
         {
             if (configValidated)
@@ -106,7 +142,7 @@ namespace BloomFilter
             }
 
             if (Hashes <= 0 || Size <= 0)
-                throw new ArgumentNullException("Neither (expectedElements, falsePositiveProbability) nor (size, hashes) were specified.");
+                throw new ArgumentNullException("Neither (capacity, falsePositiveProbability) nor (size, hashes) were specified.");
 
             // The anticipated number of items to be added to the filter. 
             if (Capacity <= 0)
@@ -172,6 +208,11 @@ namespace BloomFilter
         #endregion
 
         #region Setter
+        /// <summary>
+        /// Set the name of BF.
+        /// </summary>
+        /// <param name="name">name of the BF. Cannot be null or whitespace.</param>
+        /// <returns></returns>
         public BloomFilterBuilder<TEntity, TKey> WithName(string name)
         {
             if (!string.IsNullOrWhiteSpace(name))
@@ -179,6 +220,11 @@ namespace BloomFilter
             return this;
         }
 
+        /// <summary>
+        /// Set the FalsePositiveProbability.
+        /// </summary>
+        /// <param name="falsePositiveProbability">the falsePositiveProbability, must be greater than zero.</param>
+        /// <returns></returns>
         public BloomFilterBuilder<TEntity, TKey> WithFalsePositiveProbability(double falsePositiveProbability)
         {
             if (0 < falsePositiveProbability)
@@ -187,6 +233,11 @@ namespace BloomFilter
             return this;
         }
 
+        /// <summary>
+        /// Set the number of hash functions.
+        /// </summary>
+        /// <param name="hashes">the number of hash functions, must be greater than zero.</param>
+        /// <returns></returns>
         public BloomFilterBuilder<TEntity, TKey> WithHashes(int hashes)
         {
             if (hashes > 0)
@@ -195,6 +246,11 @@ namespace BloomFilter
             return this;
         }
 
+        /// <summary>
+        /// Set The anticipated number of items to be added to the filter.
+        /// </summary>
+        /// <param name="capacity">The anticipated number of items to be added to the filter. Must be greater than zero.</param>
+        /// <returns></returns>
         public BloomFilterBuilder<TEntity, TKey> WithCapacity(int capacity)
         {
             if (capacity > 0)
@@ -203,6 +259,11 @@ namespace BloomFilter
             return this;
         }
 
+        /// <summary>
+        /// Set the size of the BloomFilter bit sets.
+        /// </summary>
+        /// <param name="size">The size of the BloomFilter bit sets. Must be greater than zero.</param>
+        /// <returns></returns>
         public BloomFilterBuilder<TEntity, TKey> WithSize(int size)
         {
             if (size > 0)
@@ -211,12 +272,22 @@ namespace BloomFilter
             return this;
         }
 
+        /// <summary>
+        /// Set the function to compute hash.
+        /// </summary>
+        /// <param name="hashFunction">the hash function. Cannot be null.</param>
+        /// <returns></returns>
         public BloomFilterBuilder<TEntity, TKey> WithHashFunction(HashFunction hashFunction)
         {
             HashFunction = hashFunction ?? throw new ArgumentNullException();
             return this;
         }
 
+        /// <summary>
+        /// Set the backend storage.
+        /// </summary>
+        /// <param name="storage">the storage instance, cannot be null.</param>
+        /// <returns></returns>
         public BloomFilterBuilder<TEntity, TKey> WithDataStorage(IDataStorage<TEntity, TKey> storage)
         {
             DataStorage = storage ?? throw new ArgumentNullException();
